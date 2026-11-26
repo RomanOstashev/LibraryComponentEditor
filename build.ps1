@@ -29,5 +29,8 @@ $package = Join-Path $PSScriptRoot 'artifacts/LibraryComponentEditor'
 foreach ($file in 'LibraryComponentEditor.dll', 'LibraryComponentEditor.rndesc', 'Renga.WPF.Styles.dll') {
     Copy-Item -LiteralPath (Join-Path $output $file) -Destination $package -Force
 }
-Copy-Item -LiteralPath "$PSScriptRoot/tools/Prepare-RengaRuntime.ps1", "$PSScriptRoot/LICENSE", "$PSScriptRoot/third-party/Renga.WPF.Styles.LICENSE.txt" -Destination $package -Force
+dotnet build "$PSScriptRoot/tools/Setup/Setup.csproj" -c Release
+if ($LASTEXITCODE -ne 0) { throw "Setup build failed ($LASTEXITCODE)." }
+Copy-Item -LiteralPath "$PSScriptRoot/tools/Setup/bin/Release/net48/Setup.exe" -Destination $package -Force
+Copy-Item -LiteralPath "$PSScriptRoot/LICENSE", "$PSScriptRoot/third-party/Renga.WPF.Styles.LICENSE.txt" -Destination $package -Force
 Write-Output "Preview package: $package"
