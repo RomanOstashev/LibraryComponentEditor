@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RengaPlugin>
+  <Name>Library Component Editor</Name>
+  <Version>0.1.0.0</Version>
+  <RequiredAPIVersion>2.51</RequiredAPIVersion>
+  <PluginType>Net</PluginType>
+  <PluginFilename>LibraryComponentEditor.dll</PluginFilename>
+  <Vendor>Roman Ostashev</Vendor>
+  <Copyright>Copyright (c) 2026 Roman Ostashev</Copyright>
+</RengaPlugin>

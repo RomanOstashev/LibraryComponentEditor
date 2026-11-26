@@ -1,0 +1,35 @@
+name: Windows preview
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Build the .NET Framework 4.8 plugin
+        run: .\build.ps1
+      - name: Install to a test Renga folder
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'Renga'
+          New-Item -ItemType Directory -Path $root | Out-Null
+          New-Item -ItemType File -Path (Join-Path $root 'Renga.exe') | Out-Null
+          $setup = Start-Process -FilePath artifacts/LibraryComponentEditor/Setup.exe -ArgumentList ('--install "{0}"' -f $root) -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "Setup failed ($($setup.ExitCode))." }
+      - name: Load the installed plugin in a fresh process and test its window
+        run: .\tools\Test-EditorWindow.ps1 -PluginDirectory "$env:RUNNER_TEMP\Renga\Plugins\LibraryComponentEditor"
+      - name: Upload preview files
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: LibraryComponentEditor
+          path: artifacts/LibraryComponentEditor/
+          if-no-files-found: error
