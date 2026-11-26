@@ -3,8 +3,12 @@ param([Parameter(Mandatory)][string]$PluginDirectory)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName PresentationFramework, System.Windows.Forms
 $directory = (Resolve-Path -LiteralPath $PluginDirectory).ProviderPath
+[xml]$descriptor = Get-Content -LiteralPath (Join-Path $directory 'LibraryComponentEditor.rndesc') -Raw
+if ($descriptor.RengaPlugin.PluginType -ne 'Net' -or $descriptor.RengaPlugin.RequiredAPIVersion -ne '2.51') {
+    throw 'The descriptor must identify a .NET Framework plugin for API 2.51.'
+}
 [Reflection.Assembly]::LoadFrom((Join-Path $directory 'Renga.WPF.Styles.dll')) | Out-Null
-$module = [Reflection.Assembly]::LoadFrom((Join-Path $directory 'LibraryComponentEditor.dll'))
+$module = [Reflection.Assembly]::LoadFrom((Join-Path $directory $descriptor.RengaPlugin.PluginFilename))
 $pluginType = $module.GetType('LibraryComponentEditor.Plugin', $true)
 $open = $pluginType.GetMethod('OpenEditor', [Reflection.BindingFlags]'Instance, NonPublic')
 
@@ -31,6 +35,7 @@ try {
     Assert ($interop.Owner -eq [IntPtr]::Zero -and $hostWindow.IsEnabled) 'The editor must be independent of the host.'
     Assert ([Windows.Forms.Screen]::FromHandle($interop.Handle).DeviceName -eq [Windows.Forms.Screen]::FromHandle($handle).DeviceName) 'Wrong startup monitor.'
     Assert ($null -ne $editor.FindName('ComponentName').Style -and $editor.FindName('ComponentSize').Items.Count -eq 2) 'Styled demo controls failed to load.'
+    Assert ($editor.RestoreBounds.Width -gt 0 -and $editor.RestoreBounds.Height -gt 0) 'Missing restore bounds.'
 
     foreach ($state in 'Maximized', 'Normal') {
         $editor.WindowState = $state

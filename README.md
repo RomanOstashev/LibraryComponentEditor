@@ -16,7 +16,7 @@
 2. В этой папке выполните команду в 64-разрядной Windows PowerShell. Скрипт загрузит Renga SDK с сайта разработчика, проверит версию его файлов и подготовит две библиотеки для плагина.
 
    ```powershell
-   powershell.exe -NoProfile -File .\Prepare-RengaRuntime.ps1
+   powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\Prepare-RengaRuntime.ps1
    ```
 
    Если у вас уже распакован Renga SDK 2.51, добавьте к команде `-SdkDirectory "C:\SDK\RengaSDK"`. Visual Studio и RstBuilder для запуска окна не требуются.
@@ -27,10 +27,10 @@
 
 ## Сборка из исходников
 
-На Windows x64 с .NET SDK 8 или новее и .NET Framework 4.8 Developer Pack запустите в корне репозитория:
+Для сборки на Windows x64 установите .NET SDK 8 или новее и .NET Framework 4.8 Developer Pack. Выполните команду в корне репозитория.
 
 ```powershell
-powershell.exe -NoProfile -File .\build.ps1
+powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\build.ps1
 ```
 
 Готовые файлы для проверки находятся в `artifacts\LibraryComponentEditor`. Для установки выполните шаги 2–5. После подготовки зависимостей проект `src\LibraryComponentEditor\LibraryComponentEditor.csproj` также открывается в Visual Studio 2022.

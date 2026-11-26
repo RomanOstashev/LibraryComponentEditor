@@ -89,9 +89,11 @@ namespace LibraryComponentEditor.Setup
     }
     $tlb = (Resolve-Path -LiteralPath (Join-Path $SdkDirectory 'tlb/RengaCOMAPI.tlb')).ProviderPath
     [LibraryComponentEditor.Setup.InteropImporter]::Import($tlb, $work.FullName)
-    $destinationPath = [IO.Directory]::CreateDirectory($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Destination)).FullName
+    $destinationPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Destination)
+    [IO.Directory]::CreateDirectory($destinationPath) | Out-Null
     Copy-Item -LiteralPath (Join-Path $SdkDirectory 'Net/Renga.NET.PluginUtility.dll') -Destination $destinationPath -Force
     Copy-Item -Path (Join-Path $work.FullName 'Interop.*.dll') -Destination $destinationPath -Force
+    Write-Output "Renga runtime is ready in $destinationPath"
 } finally {
     Remove-Item -LiteralPath $work.FullName -Recurse -Force
 }
