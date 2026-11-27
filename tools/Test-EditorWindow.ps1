@@ -34,11 +34,20 @@ try {
     $interop = [Windows.Interop.WindowInteropHelper]::new($editor)
     Assert ($interop.Owner -eq [IntPtr]::Zero -and $hostWindow.IsEnabled) 'The editor must be independent of the host.'
     Assert ([Windows.Forms.Screen]::FromHandle($interop.Handle).DeviceName -eq [Windows.Forms.Screen]::FromHandle($handle).DeviceName) 'Wrong startup monitor.'
-    Assert ($null -ne $editor.FindName('ComponentName').Style -and $editor.FindName('ComponentSize').Items.Count -eq 2) 'Styled demo controls failed to load.'
     Assert ($editor.RestoreBounds.Width -gt 0 -and $editor.RestoreBounds.Height -gt 0) 'Missing restore bounds.'
 
     foreach ($state in 'Maximized', 'Normal') {
         $editor.WindowState = $state
+        if ($state -eq 'Normal') {
+            $editor.Width = $editor.MinWidth
+            $editor.Height = $editor.MinHeight
+        }
+        $editor.UpdateLayout()
+        foreach ($name in 'ConstructionPane', 'WorkSurface', 'SourcesPane', 'ParametersPane') {
+            $pane = $editor.FindName($name)
+            Assert ($pane.IsVisible -and $pane.ActualWidth -gt 0 -and $pane.ActualHeight -gt 0) "Missing layout area in the $state window: $name."
+            Assert ($pane.Background -and $pane.BorderBrush) "Missing Renga surface or border brush on $name."
+        }
         $editor.WindowState = 'Minimized'
         $open.Invoke($first, @($handle))
         Assert ($editor.WindowState -eq $state -and @(Get-Editors).Count -eq 1) 'Repeat activation lost the original window state.'
