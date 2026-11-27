@@ -3,29 +3,186 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Library Component Editor" Language="ru-RU"
         Style="{DynamicResource Renga.WPF.Style.Window}"
+        Foreground="{DynamicResource EditorTextBrush}" FontSize="12"
+        MinWidth="720" MinHeight="500" UseLayoutRounding="True"
         WindowStyle="SingleBorderWindow" ResizeMode="CanResize"
         WindowStartupLocation="Manual" ShowInTaskbar="True">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/Renga.WPF.Styles;component/Themes/Renga.Implicit.xaml" />
+                <ResourceDictionary Source="EditorLayoutResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <GroupBox Header="Пример параметров компонента" Width="350" Margin="20"
-                  HorizontalAlignment="Left" VerticalAlignment="Top">
-            <StackPanel Margin="12">
-                <Label Content="_Наименование" Target="{Binding ElementName=ComponentName}" />
-                <TextBox x:Name="ComponentName" Text="Насос" />
-                <Label Content="_Типоразмер" Target="{Binding ElementName=ComponentSize}" Margin="0,10,0,0" />
-                <ComboBox x:Name="ComponentSize" SelectedIndex="0">
-                    <ComboBoxItem Content="DN 50" />
-                    <ComboBoxItem Content="DN 80" />
-                </ComboBox>
-                <CheckBox Content="Показывать порты" IsChecked="True" Margin="0,16,0,0" />
-            </StackPanel>
-        </GroupBox>
-    </ScrollViewer>
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Padding="9,5"
+                Background="{DynamicResource Renga.WPF.Styles.Brush.ControlBackground}"
+                BorderBrush="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" BorderThickness="0,1,0,0">
+            <TextBlock Text="Шаблон пуст" Style="{StaticResource EditorHint}" />
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="155" MaxWidth="340" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="4*" MinWidth="310" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="1.45*" MinWidth="200" MaxWidth="470" />
+            </Grid.ColumnDefinitions>
+
+            <DockPanel Grid.Column="0" Background="{DynamicResource Renga.WPF.Styles.Brush.ControlBackground}">
+                <Border DockPanel.Dock="Top" Padding="9,6"
+                        Background="{DynamicResource Renga.WPF.Styles.Brush.WindowBackground}"
+                        BorderBrush="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" BorderThickness="0,0,0,1">
+                    <TextBlock Text="Дерево построений" Style="{StaticResource EditorHeading}" />
+                </Border>
+                <TreeView x:Name="ConstructionTree" AutomationProperties.Name="Дерево построений"
+                          Background="Transparent" BorderThickness="0" Padding="5,7"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <TreeViewItem x:Name="TemplateNode" Header="Шаблон стиля" FontWeight="SemiBold"
+                                  IsSelected="True" IsExpanded="True" Tag="{StaticResource TemplateParameters}">
+                        <TreeViewItem x:Name="GeometryNode" Header="Детальная геометрия" FontWeight="Normal"
+                                      Tag="{StaticResource ConstructionSectionParameters}" />
+                        <TreeViewItem Header="Порты" FontWeight="Normal"
+                                      Tag="{StaticResource ConstructionSectionParameters}" />
+                    </TreeViewItem>
+                </TreeView>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="1" Background="{StaticResource EditorSoftBorderBrush}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          AutomationProperties.Name="Ширина дерева построений" />
+
+            <DockPanel Grid.Column="2">
+                <Border DockPanel.Dock="Bottom"
+                        Background="{DynamicResource Renga.WPF.Styles.Brush.WindowBackground}"
+                        BorderBrush="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" BorderThickness="0,1,0,0">
+                    <Expander x:Name="SourcesPane" Header="Исходники" IsExpanded="True">
+                        <TabControl x:Name="SourceTabs" Height="150" Style="{StaticResource EditorTabs}"
+                                    AutomationProperties.Name="Формат исходника">
+                            <TabItem Header="Lua">
+                                <TextBlock Text="Исходник Lua пока пуст." Margin="10"
+                                           Style="{StaticResource EditorHint}" />
+                            </TabItem>
+                            <TabItem Header="JSON">
+                                <TextBlock Text="Исходник JSON пока пуст." Margin="10"
+                                           Style="{StaticResource EditorHint}" />
+                            </TabItem>
+                        </TabControl>
+                    </Expander>
+                </Border>
+
+                <TabControl x:Name="ViewTabs" Style="{StaticResource EditorTabs}"
+                            AutomationProperties.Name="Представления">
+                    <TabItem Header="3D-вид">
+                        <Grid x:Name="WorkSurface" Background="{StaticResource EditorViewportBrush}"
+                              ClipToBounds="True" AutomationProperties.Name="Рабочая область 3D">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.RowSpan="2" Background="{StaticResource EditorViewportGrid}"
+                                    IsHitTestVisible="False" />
+
+                            <Grid Margin="9" VerticalAlignment="Top">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" MinWidth="155" />
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="TemplateCommandBar" Grid.Column="1"
+                                        VerticalAlignment="Top" Margin="0,0,6,0" Padding="8,6"
+                                        Style="{StaticResource EditorPalette}">
+                                    <TextBlock Text="Команды шаблона" Style="{StaticResource EditorHeading}" />
+                                </Border>
+                                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                    <Border Style="{StaticResource EditorPalette}">
+                                        <StackPanel>
+                                            <TextBlock Text="Инструменты" Margin="2,0,0,3"
+                                                       Style="{StaticResource EditorHeading}" />
+                                            <UniformGrid x:Name="ToolSlots" Columns="5" Rows="2">
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Margin="0,5,0,0" Style="{StaticResource EditorPalette}">
+                                        <StackPanel>
+                                            <TextBlock Text="Действия" Margin="2,0,0,3"
+                                                       Style="{StaticResource EditorHeading}" />
+                                            <UniformGrid x:Name="ActionSlots" Columns="5" Rows="1">
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                                <Border Style="{StaticResource EditorPaletteSlot}" />
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock Grid.Row="1" Text="Построений пока нет" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" Style="{StaticResource EditorHint}"
+                                       IsHitTestVisible="False" />
+
+                            <Canvas x:Name="ViewCube" Grid.Row="1" Width="100" Height="58" Margin="12"
+                                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                    AutomationProperties.Name="Куб видов" IsHitTestVisible="False">
+                                <Polygon Points="1,21 23,4 97,4 75,21" Fill="#F8FAFC"
+                                         Stroke="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" />
+                                <Polygon Points="1,21 75,21 75,56 1,56" Fill="#E6EDF2"
+                                         Stroke="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" />
+                                <Polygon Points="75,21 97,4 97,39 75,56" Fill="#D4E0E9"
+                                         Stroke="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" />
+                                <TextBlock Canvas.Left="36" Canvas.Top="5" Text="Верх" FontSize="10" />
+                                <TextBlock Canvas.Left="16" Canvas.Top="31" Text="Спереди" FontSize="10" />
+                                <TextBlock Canvas.Left="92" Canvas.Top="16" Text="Справа" FontSize="8">
+                                    <TextBlock.RenderTransform>
+                                        <RotateTransform Angle="90" />
+                                    </TextBlock.RenderTransform>
+                                </TextBlock>
+                            </Canvas>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </DockPanel>
+
+            <GridSplitter Grid.Column="3" Background="{StaticResource EditorSoftBorderBrush}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          AutomationProperties.Name="Ширина панели параметров" />
+
+            <TabControl x:Name="InspectorTabs" Grid.Column="4" Style="{StaticResource EditorTabs}"
+                        AutomationProperties.Name="Контекстная панель">
+                <TabItem Header="Параметры">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ContentControl x:Name="ParametersCard" Margin="11"
+                                        Content="{Binding SelectedItem.Header, ElementName=ConstructionTree}"
+                                        ContentTemplate="{Binding SelectedItem.Tag, ElementName=ConstructionTree,
+                                                                  FallbackValue={StaticResource TemplateParameters}}"
+                                        HorizontalContentAlignment="Stretch" />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Проверка">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <TextBlock Text="Пробных значений пока нет." Margin="11"
+                                   Style="{StaticResource EditorHint}" />
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </DockPanel>
 </Window>

@@ -34,8 +34,40 @@ try {
     $interop = [Windows.Interop.WindowInteropHelper]::new($editor)
     Assert ($interop.Owner -eq [IntPtr]::Zero -and $hostWindow.IsEnabled) 'The editor must be independent of the host.'
     Assert ([Windows.Forms.Screen]::FromHandle($interop.Handle).DeviceName -eq [Windows.Forms.Screen]::FromHandle($handle).DeviceName) 'Wrong startup monitor.'
-    Assert ($null -ne $editor.FindName('ComponentName').Style -and $editor.FindName('ComponentSize').Items.Count -eq 2) 'Styled demo controls failed to load.'
     Assert ($editor.RestoreBounds.Width -gt 0 -and $editor.RestoreBounds.Height -gt 0) 'Missing restore bounds.'
+
+    $editor.UpdateLayout()
+    $tree = $editor.FindName('ConstructionTree')
+    $root = $editor.FindName('TemplateNode')
+    $geometry = $editor.FindName('GeometryNode')
+    $card = $editor.FindName('ParametersCard')
+    $views = $editor.FindName('ViewTabs')
+    $workSurface = $editor.FindName('WorkSurface')
+    $tools = $editor.FindName('ToolSlots')
+    $actions = $editor.FindName('ActionSlots')
+    $inspector = $editor.FindName('InspectorTabs')
+    $sources = $editor.FindName('SourcesPane')
+    $sourceTabs = $editor.FindName('SourceTabs')
+
+    Assert ($tree.IsVisible -and $tree.SelectedItem -eq $root -and $card.Content -eq $root.Header) 'The layout did not open at the root of the template.'
+    Assert ($views.Items.Count -eq 1 -and $workSurface.IsVisible -and $editor.FindName('ViewCube').IsVisible) 'Missing default 3D workspace or view cube.'
+    Assert ($editor.FindName('TemplateCommandBar').IsVisible -and $tools.Columns -eq 5 -and $actions.Columns -eq 5) 'Missing editor command areas.'
+    $geometry.IsSelected = $true
+    $editor.UpdateLayout()
+    Assert ($card.Content -eq $geometry.Header -and $card.ContentTemplate -eq $geometry.Tag) 'The parameters card did not follow the tree selection.'
+    $root.IsSelected = $true
+
+    Assert ($inspector.Items.Count -eq 2 -and $sourceTabs.Items.Count -eq 2 -and $sourceTabs.IsVisible) 'Missing inspector or source tabs.'
+    $inspector.SelectedIndex = 1
+    $sourceTabs.SelectedIndex = 1
+    $editor.UpdateLayout()
+    Assert ($inspector.SelectedContent.IsVisible -and $sourceTabs.SelectedContent.IsVisible -and $workSurface.IsVisible) 'Switching tabs hid the 3D workspace or left a tab empty.'
+    $sources.IsExpanded = $false
+    $editor.UpdateLayout()
+    Assert (-not $sourceTabs.IsVisible -and $workSurface.IsVisible) 'Collapsing the sources must leave the workspace open.'
+    $sources.IsExpanded = $true
+    $editor.UpdateLayout()
+    Assert ($sourceTabs.IsVisible) 'The sources did not reopen.'
 
     foreach ($state in 'Maximized', 'Normal') {
         $editor.WindowState = $state

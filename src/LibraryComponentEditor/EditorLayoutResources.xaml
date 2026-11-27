@@ -1,0 +1,140 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="EditorTextBrush" Color="#24313A" />
+    <SolidColorBrush x:Key="EditorMutedBrush" Color="#53626F" />
+    <SolidColorBrush x:Key="EditorAccentBrush" Color="#405E73" />
+    <SolidColorBrush x:Key="EditorSoftBorderBrush" Color="#D3DCE3" />
+    <SolidColorBrush x:Key="EditorViewportBrush" Color="#F0F4F6" />
+
+    <DrawingBrush x:Key="EditorViewportGrid" Viewbox="0,0,32,32" ViewboxUnits="Absolute"
+                  Viewport="0,0,32,32" ViewportUnits="Absolute" TileMode="Tile">
+        <DrawingBrush.Transform>
+            <MatrixTransform Matrix="1,0.42,-0.77,0.66,0,0" />
+        </DrawingBrush.Transform>
+        <DrawingBrush.Drawing>
+            <GeometryDrawing Geometry="M 0.5,0 L 0.5,32 M 0,0.5 L 32,0.5">
+                <GeometryDrawing.Pen>
+                    <Pen Brush="#D9E3E9" Thickness="0.7" />
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <Style x:Key="EditorHeading" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="EditorHint" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource EditorMutedBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="EditorPalette" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Renga.WPF.Styles.Brush.WindowBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style x:Key="EditorPaletteSlot" TargetType="Border">
+        <Setter Property="Width" Value="25" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="Margin" Value="1.5" />
+        <Setter Property="Background" Value="#F6F8FA" />
+        <Setter Property="BorderBrush" Value="{StaticResource EditorSoftBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="1" />
+    </Style>
+
+    <Style x:Key="EditorTabFocus" TargetType="Control">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="2" Stroke="{StaticResource EditorAccentBrush}"
+                               StrokeDashArray="1 2" IsHitTestVisible="False" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="EditorTabItem" TargetType="TabItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource EditorMutedBrush}" />
+        <Setter Property="Padding" Value="11,6,11,5" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource EditorTabFocus}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="TabHeader" Background="{TemplateBinding Background}"
+                            BorderThickness="0,0,0,2" BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Header" RecognizesAccessKey="True"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="TabHeader" Property="Background"
+                                    Value="{DynamicResource Renga.WPF.Styles.Brush.SelectedItemBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="TabHeader" Property="Background"
+                                    Value="{DynamicResource Renga.WPF.Styles.Brush.ControlBackground}" />
+                            <Setter TargetName="TabHeader" Property="BorderBrush" Value="{StaticResource EditorAccentBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource EditorTextBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource Renga.WPF.Styles.Brush.DisabledForeground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="EditorTabs" TargetType="TabControl">
+        <Setter Property="Background" Value="{DynamicResource Renga.WPF.Styles.Brush.ControlBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Renga.WPF.Styles.Brush.ControlBorder}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource EditorTabItem}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <DockPanel KeyboardNavigation.TabNavigation="Local">
+                        <Border DockPanel.Dock="Top" Background="{DynamicResource Renga.WPF.Styles.Brush.WindowBackground}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" Padding="5,0">
+                            <TabPanel IsItemsHost="True" KeyboardNavigation.TabNavigation="Once"
+                                      KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Border>
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </DockPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DataTemplate x:Key="TemplateParameters">
+        <StackPanel>
+            <TextBlock Text="Шаблон стиля" FontSize="14" Style="{StaticResource EditorHeading}" />
+            <Separator Margin="0,10" Background="{StaticResource EditorSoftBorderBrush}" />
+            <TextBlock Text="Параметры стиля" Style="{StaticResource EditorHeading}" />
+            <TextBlock Text="Параметров пока нет." Margin="0,4,0,12" Style="{StaticResource EditorHint}" />
+            <TextBlock Text="Порты" Style="{StaticResource EditorHeading}" />
+            <TextBlock Text="Портов пока нет." Margin="0,4,0,0" Style="{StaticResource EditorHint}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ConstructionSectionParameters">
+        <StackPanel>
+            <TextBlock Text="{Binding}" FontSize="14" Style="{StaticResource EditorHeading}" />
+            <TextBlock Text="В этом разделе пока нет элементов." Margin="0,6,0,0" Style="{StaticResource EditorHint}" />
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>
